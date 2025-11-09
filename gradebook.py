@@ -1,5 +1,5 @@
 # GradeBook Analyzer by Amarsh Dubey
-# Date: November 9, 2025
+# Date: 3 November, 2025
 
 import csv
 import sys
