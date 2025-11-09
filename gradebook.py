@@ -1,187 +1,194 @@
-# GradeBook Analyzer
-# Author: Amarsh Dubey
+# GradeBook Analyzer by Amarsh Dubey
 # Date: November 9, 2025
 
 import csv
 import sys
-from statistics import mean, median
 
-def print_welcome():
-      print("="*60)
-      print(" "*15 + "GRADEBOOK ANALYZER")
-      print("="*60)
-      print("Welcome to the GradeBook Analyzer!")
+def show_welcome():
+          print("="*50)
+          print("    GRADEBOOK ANALYZER")
+          print("="*50)
+          print("Welcome!")
 
-def print_menu():
-      print("\n" + "="*60)
-      print("MENU OPTIONS:")
-      print("="*60)
-      print("1. Manual entry of student marks")
-      print("2. Load marks from CSV file")
-      print("3. Exit")
-      print("="*60)
+def show_menu():
+          print("\n" + "="*50)
+          print("MENU:")
+          print("1. Enter marks manually")
+          print("2. Load from CSV file")
+          print("3. Exit")
+          print("="*50)
 
-def manual_entry():
-      marks_dict = {}
-      print("\nEnter student names and marks (enter 'done' when finished)")
-      while True:
-                name = input("Enter student name (or 'done' to finish): ").strip()
-                if name.lower() == 'done':
-                              break
-                          if not name:
-                                        print("Name cannot be empty.")
-                                        continue
-                                    try:
-                                                  mark = float(input(f"Enter marks for {name}: "))
-                                                  if 0 <= mark <= 100:
-                                                                    marks_dict[name] = mark
-                                                                else:
-                print("Marks must be between 0 and 100.")
-                except ValueError:
-                    print("Invalid input. Please enter a number.")
-            return marks_dict
+def enter_marks():
+          students = {}
+          print("\nEnter student data (type 'done' to finish):")
+          while True:
+                        name = input("Student name (or 'done'): ")
+                        if name == 'done':
+                                          break
+                                      try:
+                                                        marks = float(input("Marks: "))
+                                                        if marks >= 0 and marks <= 100:
+                                                                              students[name] = marks
+                                                                          else:
+                print("Please enter marks between 0 and 100")
+                                                    except:
+            print("Invalid input")
+                    return students
 
-def load_from_csv():
-      marks_dict = {}
-    filename = input("Enter CSV filename: ").strip()
+def load_csv():
+          students = {}
+    filename = input("Enter filename: ")
     try:
-              with open(filename, 'r') as file:
-                            csv_reader = csv.reader(file)
-                            next(csv_reader)
-                            for row in csv_reader:
-                                              if len(row) >= 2:
-                                                                    name = row[0].strip()
-                                                                    try:
-                                                                                              mark = float(row[1])
-                                                                                              if 0 <= mark <= 100:
-                                                                                                                            marks_dict[name] = mark
-                                                                                                                    except ValueError:
-                                                                                                                                              pass
-                                                                                                                              print(f"Successfully loaded {len(marks_dict)} students")
-                                                    except FileNotFoundError:
-                        print("File not found.")
-    return marks_dict
+                  file = open(filename, 'r')
+                  reader = csv.reader(file)
+                  next(reader)
+                  for row in reader:
+                                    name = row[0]
+                                    marks = float(row[1])
+                                    students[name] = marks
+                                file.close()
+        print("Loaded", len(students), "students")
+    except:
+        print("File not found")
+    return students
 
-def calculate_average(marks_dict):
-      if not marks_dict:
-                return 0
-    return mean(marks_dict.values())
+def get_average(students):
+          total = 0
+    for marks in students.values():
+                  total = total + marks
+    average = total / len(students)
+    return average
 
-def calculate_median(marks_dict):
-      if not marks_dict:
-                return 0
-    return median(marks_dict.values())
+def get_highest(students):
+          highest = 0
+    for marks in students.values():
+                  if marks > highest:
+                                    highest = marks
+                            return highest
 
-def find_max_score(marks_dict):
-      if not marks_dict:
-                return 0
-    return max(marks_dict.values())
+def get_lowest(students):
+          lowest = 100
+    for marks in students.values():
+                  if marks < lowest:
+                                    lowest = marks
+                            return lowest
 
-def find_min_score(marks_dict):
-      if not marks_dict:
-                return 0
-    return min(marks_dict.values())
-
-def assign_grade(mark):
-      if mark >= 90:
-                return 'A'
-    elif mark >= 80:
-        return 'B'
-    elif mark >= 70:
-        return 'C'
-    elif mark >= 60:
-        return 'D'
-    else:
+def get_grade(marks):
+          if marks >= 90:
+                        return 'A'
+                    elif marks >= 80:
+                                  return 'B'
+                              elif marks >= 70:
+                                            return 'C'
+                                        elif marks >= 60:
+                                                      return 'D'
+                                                  else:
         return 'F'
 
-def calculate_grades(marks_dict):
-      grades_dict = {}
-    for name, mark in marks_dict.items():
-              grades_dict[name] = assign_grade(mark)
-    return grades_dict
+def show_statistics(students):
+          print("\n" + "="*50)
+    print("STATISTICS")
+    print("="*50)
+    print("Total Students:", len(students))
+    print("Average Marks:", round(get_average(students), 2))
+    print("Highest Marks:", get_highest(students))
+    print("Lowest Marks:", get_lowest(students))
 
-def grade_distribution(grades_dict):
-      distribution = {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0}
-    for grade in grades_dict.values():
-              distribution[grade] += 1
-    return distribution
-
-def filter_pass_fail(marks_dict):
-      passed_students = [(name, mark) for name, mark in marks_dict.items() if mark >= 40]
-    failed_students = [(name, mark) for name, mark in marks_dict.items() if mark < 40]
-    return passed_students, failed_students
-
-def print_statistics(marks_dict):
-      print("\n" + "="*60)
-    print("STATISTICAL ANALYSIS")
-    print("="*60)
-    print(f"Total Students: {len(marks_dict)}")
-    print(f"Average Marks: {calculate_average(marks_dict):.2f}")
-    print(f"Median Marks: {calculate_median(marks_dict):.2f}")
-    print(f"Maximum Score: {find_max_score(marks_dict):.2f}")
-    print(f"Minimum Score: {find_min_score(marks_dict):.2f}")
-
-def print_grade_distribution(distribution):
-      print("\n" + "="*60)
+def show_grades(students):
+          grades = {}
+    for name in students:
+                  marks = students[name]
+        grade = get_grade(marks)
+        grades[name] = grade
+    a_count = 0
+    b_count = 0
+    c_count = 0
+    d_count = 0
+    f_count = 0
+    for grade in grades.values():
+                  if grade == 'A':
+                                    a_count = a_count + 1
+                                elif grade == 'B':
+                                                  b_count = b_count + 1
+                                              elif grade == 'C':
+                                                                c_count = c_count + 1
+                                                            elif grade == 'D':
+                                                                              d_count = d_count + 1
+                                                                          else:
+            f_count = f_count + 1
+    print("\n" + "="*50)
     print("GRADE DISTRIBUTION")
-    print("="*60)
-    for grade in ['A', 'B', 'C', 'D', 'F']:
-              count = distribution[grade]
-        print(f"Grade {grade}: {count} students")
+    print("="*50)
+    print("Grade A:", a_count)
+    print("Grade B:", b_count)
+    print("Grade C:", c_count)
+    print("Grade D:", d_count)
+    print("Grade F:", f_count)
+    return grades
 
-def print_pass_fail_summary(passed, failed):
-      print("\n" + "="*60)
+
+def show_pass_fail(students):
+          passed = 0
+    failed = 0
+    for name in students:
+                  marks = students[name]
+        if marks >= 40:
+                          passed = passed + 1
+                      else:
+            failed = failed + 1
+    print("~"*50)
     print("PASS/FAIL SUMMARY")
-    print("="*60)
-    print(f"Passed Students: {len(passed)}")
-    print(f"Failed Students: {len(failed)}")
+    print("~"*50)
+    print("Passed:", passed)
+    print("Failed:", failed)
 
-def print_results_table(marks_dict, grades_dict):
-      print("\n" + "="*60)
-    print("STUDENT RESULTS TABLE")
-    print("="*60)
-    print(f"{'Name':<25} {'Marks':<10} {'Grade':<10}")
-    print("-"*60)
-    sorted_students = sorted(marks_dict.items(), key=lambda x: x[1], reverse=True)
-    for name, mark in sorted_students:
-              grade = grades_dict[name]
-        print(f"{name:<25} {mark:<10.2f} {grade:<10}")
 
-def analyze_grades(marks_dict):
-      if not marks_dict:
-                print("No student data available.")
-        return
-    grades_dict = calculate_grades(marks_dict)
-    print_statistics(marks_dict)
-    distribution = grade_distribution(grades_dict)
-    print_grade_distribution(distribution)
-    passed, failed = filter_pass_fail(marks_dict)
-    print_pass_fail_summary(passed, failed)
-    print_results_table(marks_dict, grades_dict)
+def show_results(students, grades):
+          print("~"*50)
+    print("RESULTS TABLE")
+    print("~"*50)
+    names = []
+    for name in students:
+                  names.append(name)
+    for i in range(len(names)):
+                  for j in range(i+1, len(names)):
+                                    if students[names[i]] < students[names[j]]:
+                                                          temp = names[i]
+                                                          names[i] = names[j]
+                                                          names[j] = temp
+                                              for name in names:
+                                                            marks = students[name]
+                                                            grade = grades[name]
+                                                            print(name, marks, grade)
+
 
 def main():
-      print_welcome()
-    marks_dict = {}
+          show_welcome()
     while True:
-              print_menu()
-        choice = input("\nEnter your choice (1-3): ").strip()
-        if choice == '1':
-                      marks_dict = manual_entry()
-            if marks_dict:
-                              analyze_grades(marks_dict)
-        elif choice == '2':
-            marks_dict = load_from_csv()
-            if marks_dict:
-                              analyze_grades(marks_dict)
-        elif choice == '3':
-            print("Thank you for using GradeBook Analyzer!")
-            sys.exit(0)
+                  show_menu()
+        choice = input("Enter choice: ")
+        if choice == "1":
+                          students = enter_marks()
+        elif choice == "2":
+            students = load_csv()
+        elif choice == "3":
+            print("Goodbye!")
+            sys.exit()
         else:
-            print("Invalid choice. Please enter 1, 2, or 3.")
-        cont = input("\nAnalyze another dataset? (y/n): ").strip().lower()
-        if cont != 'y':
-                      print("Thank you for using GradeBook Analyzer!")
+            print("Invalid choice")
+            continue
+        if len(students) == 0:
+                          print("No students loaded")
+            continue
+        show_statistics(students)
+        grades = show_grades(students)
+        show_pass_fail(students)
+        show_results(students, grades)
+        again = input("Analyze again? (y/n): ")
+        if again != "y":
+                          print("Goodbye!")
             break
 
+
 if __name__ == "__main__":
-      main()
+          main()
